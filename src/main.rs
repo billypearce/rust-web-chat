@@ -1,19 +1,22 @@
-use std::fs;
+use std::{thread, fs};
 use axum::{
     routing::get,
     response::Html,
     Router,
-    extract::Path,
-    http::header::{HeaderMap, CONTENT_TYPE},
+    extract::{Path, Json},
+    http::{header::{HeaderMap, CONTENT_TYPE}, StatusCode},
+    Extension,
 };
 use sqlx::sqlite::SqlitePool;
+use serde::Deserialize;
 
 #[tokio::main]
 async fn main() {
     let pool = SqlitePool::connect("users.db").await.unwrap();
     let app = Router::new()
-        .route("/", get(home))
+        .route("/:id", get(home))
         .route("/login", get(login_page).post(auth))
+        .layer(Extension(pool))
         .route("/register", get(register_page).post(create_user))
         .route("/foo", get(foo))
         .route("/static/*path", get(static_file));
@@ -34,8 +37,10 @@ async fn login_page() -> Html<String> {
     Html(document)
 }
 
-async fn auth() {
-
+#[axum_macros::debug_handler]
+async fn auth(pool: Extension<SqlitePool>, Json(payload): Json<UserCredentials>) -> StatusCode {
+    dbg!(payload);
+    StatusCode::OK
 }
 
 async fn register_page() -> Html<String> {
@@ -83,6 +88,19 @@ fn extension(filename: &str) -> StaticFileType {
     } else {
         StaticFileType::Other
     }
+}
+
+#[derive(Deserialize, Debug)]
+struct User {
+    id: i32,
+    username: String,
+    password: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct UserCredentials {
+    username: String,
+    password: String,
 }
 
 #[cfg(test)]

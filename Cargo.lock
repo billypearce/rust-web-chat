@@ -1750,6 +1750,7 @@ dependencies = [
  "axum",
  "axum-extra",
  "axum-macros",
+ "serde",
  "sqlx",
  "tokio",
 ]
