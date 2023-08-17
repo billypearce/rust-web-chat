@@ -4,20 +4,27 @@ use axum::{
     routing::get,
     response::{Html, Redirect},
     Router,
-    extract::{Path, Form},
+    extract::{Path, Form, Extension},
     http::header::{HeaderMap, CONTENT_TYPE},
 };
 use rusqlite::Connection;
+use minijinja::{Environment, context};
 
 pub async fn run() {
+
+    let mut env = Environment::new();
+    env.add_template_owned("base", fs::read_to_string("templates/base.html").unwrap()).unwrap();
+    env.add_template_owned("index", fs::read_to_string("templates/index.html").unwrap()).unwrap();
+    env.add_template_owned("login", fs::read_to_string("templates/auth/login.html").unwrap()).unwrap();
+    env.add_template_owned("register", fs::read_to_string("templates/auth/register.html").unwrap()).unwrap();
 
     let app = Router::new()
         .route("/", get(|| async { Redirect::to("/login") }))
         .route("/:id", get(home))
         .route("/login", get(login_page).post(auth))
         .route("/register", get(register_page).post(create_user))
-        .route("/foo", get(foo))
-        .route("/static/*path", get(static_file));
+        .route("/static/*path", get(static_file))
+        .layer(Extension(env));
 
     axum::Server::bind(&"127.0.0.1:3000".parse().unwrap())
         .serve(app.into_make_service())
@@ -26,14 +33,14 @@ pub async fn run() {
 
 }
 
-async fn home() -> Html<String> {
-    let document = fs::read_to_string("index.html").unwrap();
-    Html(document)
+async fn home(Extension(env): Extension<Environment<'_>>) -> Html<String> {
+    let template = env.get_template("index").unwrap();
+    Html(template.render(context!()).unwrap())
 }
 
-async fn login_page() -> Html<String> {
-    let document = fs::read_to_string("auth/login.html").unwrap();
-    Html(document)
+async fn login_page(Extension(env): Extension<Environment<'_>>) -> Html<String> {
+    let template = env.get_template("login").unwrap();
+    Html(template.render(context!()).unwrap())
 }
 
 #[axum_macros::debug_handler]
@@ -55,9 +62,9 @@ async fn auth(Form(creds): Form<UserCredentials>) -> Redirect {
     }
 }
 
-async fn register_page() -> Html<String> {
-    let document = fs::read_to_string("auth/register.html").unwrap();
-    Html(document)
+async fn register_page(Extension(env): Extension<Environment<'_>>) -> Html<String> {
+    let template = env.get_template("register").unwrap();
+    Html(template.render(context!()).unwrap())
 }
 
 async fn create_user(Form(creds): Form<UserCredentials>) -> Redirect {
@@ -72,10 +79,6 @@ async fn create_user(Form(creds): Form<UserCredentials>) -> Redirect {
         Ok(_) => Redirect::to("/login"),
         Err(_) => Redirect::to("/register"),
     }
-}
-
-async fn foo() -> &'static str {
-    "foo"
 }
 
 #[axum_macros::debug_handler]
