@@ -9,4 +9,13 @@
         <input id="password" type="password" name="password"><br>
         <input type="submit" name="submit"><br>
     </form>
+    <p id="error-msg" style="color:red; display:none;">Login Failed.</p>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const fail = params.get("fail");
+
+        if(fail) {
+            document.getElementById("error-msg").style["display"] = "block";
+        }
+    </script>
 {% endblock %}

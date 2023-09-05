@@ -8,6 +8,15 @@
     <script src="static/js/htmx.min.js"></script>
 </head>
 <body>
+    <div id="header">
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+            </ul>
+        </nav>
+    </div>
     <h1>{% block header %}{% endblock %}</h1>
     {% block body %}
 

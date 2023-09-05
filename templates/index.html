@@ -2,5 +2,18 @@
 {% block title %}Home{% endblock %}
 {% block header %}Home{% endblock %}
 {% block body %}
+
+<script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
 <p>uhhhhhhhhhhhh</p>
+<div hx-ext="ws" ws-connect="/echo">
+    <h1>Echo</h1>
+    <form ws-send ws-target="#echo-list">
+        <input name="msg">
+        <input type="submit">
+    </form>
+    <div id="echo-list" hx-ws="receive">
+
+    </div>
+</div>
+
 {% endblock %}
