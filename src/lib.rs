@@ -1,9 +1,14 @@
 mod handlers;
 mod staticfiles;
+mod rooms;
 
 use axum::{extract::Extension, response::Redirect, routing::get, Router};
 use minijinja::Environment;
-use std::fs;
+use rusqlite::Connection;
+use std::{
+    fs,
+    path::Path,
+};
 
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut env = Environment::new();
@@ -14,6 +19,8 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         "register",
         fs::read_to_string("templates/auth/register.html")?,
     )?;
+
+    init_db();
 
     let app = Router::new()
         .route("/", get(|| async { Redirect::to("/login") }))
@@ -32,4 +39,15 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     Ok(())
+}
+
+fn init_db() {
+    match Path::new("users.db").try_exists() {
+        Ok(true) => (),
+        Ok(false) => {
+            let db = Connection::open("users.db").unwrap();
+            db.execute("CREATE TABLE users(username text UNIQUE, password text);", ()).unwrap();
+        },
+        Err(e) => panic!("DB oopsie: {}", e),
+    }
 }
