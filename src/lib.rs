@@ -1,6 +1,6 @@
 mod handlers;
 mod staticfiles;
-mod rooms;
+// mod rooms;
 
 use axum::{extract::Extension, response::Redirect, routing::get, Router};
 use minijinja::Environment;
