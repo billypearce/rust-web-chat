@@ -1,8 +1,110 @@
+@font-face {
+    font-family: "montserrat";
+    src: url("fonts/Montserrat-VariableFont_wght.ttf");
+}
+
+@font-face {
+    font-family: "robotoslab";
+    src: url("fonts/RobotoSlab-VariableFont_wght.ttf");
+}
+
+html {
+    font-family: "montserrat";
+    color: white;
+}
+
 body {
-    background-color: lightgray;
+    background-color: #121212;
+    margin: 0;
+    top: 0;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "robotoslab";
+    color: #a688fa;
+    font-variation-settings: "wght" 800;
 }
 
 h1 {
-    font-size: 1em;
-    color: green;
+    font-size: 2.5em;
+}
+
+.top-nav {
+    width: 100%;
+    background-color: #1a1625;
+}
+
+.top-nav ul {
+    display: block;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.top-nav li {
+    display: inline-block;
+}
+
+.top-nav a {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    padding: 1em;
+    color: white;
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+.top-nav a:hover {
+    background-color: #a688fa;
+}
+
+#body {
+    margin: 0 3em;
+    height: 80vh;
+}
+
+#chat-box-wrapper {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+
+#chat-box {
+    flex: 1 1 auto;
+    border: 3px solid black;
+    border-radius: 15px;
+    background-color: #282828;
+    padding: 1em;
+    overflow: scroll;
+}
+
+#chat-input {
+    flex: 0 1 auto;
+    display: flex;
+    flex-flow: row;
+}
+
+#chat-input input:first-child {
+    flex: 1 1 auto;
+}
+
+#chat-input input:last-child {
+    flex: 0 1 auto;
+}
+
+input {
+    border: 3px solid black;
+    border-radius: 15px;
+    background-color: #282828;
+    padding: 1em;
+    color:white;
+    font-family: 'montserrat';
+    margin: 1em;
+}
+
+.display-name {
+    color: #5e43f3;
+    font-weight: 700;
 }

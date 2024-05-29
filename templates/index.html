@@ -4,16 +4,23 @@
 {% block body %}
 
 <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
-<p>uhhhhhhhhhhhh</p>
-<div hx-ext="ws" ws-connect="/echo">
-    <h1>Echo</h1>
-    <form ws-send ws-target="#echo-list">
-        <input name="msg">
-        <input type="submit">
-    </form>
-    <div id="echo-list" hx-ws="receive">
+<div id="chat-box-wrapper" hx-ext="ws" ws-connect="/echo">
+    <p>echo chat:</p>
+    <div id="chat-box" hx-ws="receive">
 
     </div>
+    <form id="chat-input" ws-send ws-target="#echo-list">
+        <input id="chat-text" name="msg">
+        <input id="chat-send" type="button" onclick="sendChat()" text="Send">
+    </form>
+    <script>
+        function sendChat() {
+            let form = document.getElementById("chat-input");
+            form.submit();
+            form.reset();
+            return false;
+        }
+    </script>
 </div>
 
 {% endblock %}

@@ -1,14 +1,17 @@
 mod handlers;
 mod staticfiles;
-// mod rooms;
+mod state;
 
 use axum::{extract::Extension, response::Redirect, routing::get, Router};
 use minijinja::Environment;
 use rusqlite::Connection;
+use state::AppState;
 use std::{
-    fs,
-    path::Path,
+    sync::{Arc, Mutex},
+    fs, path::Path
 };
+
+use crate::state::TopLevelState;
 
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut env = Environment::new();
@@ -22,6 +25,10 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     init_db();
 
+    let state = TopLevelState{
+        state: Arc::new(Mutex::new(AppState::new()))
+    };
+
     let app = Router::new()
         .route("/", get(|| async { Redirect::to("/login") }))
         .route("/:id", get(handlers::home))
@@ -32,7 +39,8 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         )
         .route("/static/*path", get(handlers::static_file))
         .route("/echo", get(handlers::echo))
-        .layer(Extension(env));
+        .layer(Extension(env))
+        .with_state(state);
 
     axum::Server::bind(&"127.0.0.1:3000".parse()?)
         .serve(app.into_make_service())

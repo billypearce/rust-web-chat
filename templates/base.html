@@ -9,7 +9,7 @@
 </head>
 <body>
     <div id="header">
-        <nav>
+        <nav class="top-nav">
             <ul>
                 <li><a href="/">Home</a></li>
                 <li><a href="/login">Login</a></li>
@@ -17,9 +17,11 @@
             </ul>
         </nav>
     </div>
-    <h1>{% block header %}{% endblock %}</h1>
-    {% block body %}
+    <div id="body">
+        <h1>{% block header %}{% endblock %}</h1>
+        {% block body %}
 
-    {% endblock %}
+        {% endblock %}
+    </div>
 </body>
 </html>

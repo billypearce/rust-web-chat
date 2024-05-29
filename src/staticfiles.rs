@@ -2,6 +2,7 @@ pub enum StaticFileType {
     Css,
     Js,
     Img,
+    Font,
     Other,
 }
 
@@ -12,6 +13,8 @@ pub fn extension(filename: &str) -> StaticFileType {
         StaticFileType::Js
     } else if filename.contains(".png") || filename.contains(".jpg") {
         StaticFileType::Img
+    } else if filename.contains(".ttf") {
+        StaticFileType::Font
     } else {
         StaticFileType::Other
     }
