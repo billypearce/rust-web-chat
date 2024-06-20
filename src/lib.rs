@@ -39,6 +39,8 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .layer(Extension(env))
         .with_state(state);
 
+    println!("Server running: http://localhost:3000/");
+
     axum::Server::bind(&"127.0.0.1:3000".parse()?)
         .serve(app.into_make_service())
         .await?;
