@@ -3,9 +3,9 @@
 {% block header %}Home{% endblock %}
 {% block body %}
 
-<script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
-<div id="chat-box-wrapper" hx-ext="ws" ws-connect="/chat">
-    <p>echo chat:</p>
+<div id="chat-box-wrapper" hx-ext="ws" ws-connect="/chat/{{ name }}">
+    <h5>Chat Room</h5>
+    <p>Chatting as: <span id="username">{{ name }}</span></p>
     <div id="chat-box" hx-ws="receive">
 
     </div>

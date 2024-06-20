@@ -1,5 +1,5 @@
 use axum::{
-    extract::{WebSocketUpgrade, State, ws::{WebSocket, Message},
+    extract::{ws::{Message, WebSocket}, Path, State, WebSocketUpgrade
     },
     response::Response,
 };
@@ -11,16 +11,18 @@ use crate::AppState;
 
 pub async fn chat(
     ws: WebSocketUpgrade, 
-    State(state): State<AppState>
+    State(state): State<AppState>,
+    Path(name): Path<String>
 ) -> Response {
     let (tx, rx) = state.channel.subscribe();
-    ws.on_upgrade(|ws| handle_chat(ws, tx, rx))
+    ws.on_upgrade(|ws| handle_chat(ws, tx, rx, name))
 }
 
 async fn handle_chat(
     sock: WebSocket,
     tx: Sender<String>, 
-    mut rx: Receiver<String>
+    mut rx: Receiver<String>,
+    name: String
 ) {
     let (sock_tx, sock_rx) = sock.split();
 
@@ -41,7 +43,7 @@ async fn handle_chat(
         while let Some(Ok(msg)) = sock.next().await {
             let msg = extract_message(msg).unwrap();
             let msg = strip_quotes(&msg);
-            let msg = format!("<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>NAEM:</span> {}<br></div>", msg);
+            let msg = format!("<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>{}:</span> {}<br></div>", name, msg);
             if tx.send(msg).is_err() {
                 return;
             }

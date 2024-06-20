@@ -40,7 +40,7 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
             get(register_page).post(create_user),
         )
         .route("/static/*path", get(static_file))
-        .route("/chat", get(chat))
+        .route("/chat/:name", get(chat))
         .layer(Extension(env))
         .with_state(state);
 
