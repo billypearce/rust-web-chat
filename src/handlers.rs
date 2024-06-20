@@ -9,9 +9,14 @@ use minijinja::{context, Environment};
 use rusqlite::Connection;
 use serde::Deserialize;
 use serde_json::Value;
-use std::fs;
+use std::{sync::Arc, fs};
+use tokio::sync::broadcast;
+use futures::{stream::StreamExt, sink::SinkExt};
 
-use crate::staticfiles::{extension, StaticFileType};
+use crate::{
+    state::AppState, 
+    staticfiles::{extension, StaticFileType}
+};
 
 pub async fn home(Extension(env): Extension<Environment<'_>>) -> Html<String> {
     let template = env.get_template("index").expect("Template not found");
@@ -106,29 +111,66 @@ pub async fn static_file(Path(path): Path<String>) -> (HeaderMap, Vec<u8>) {
 
 }
 
-pub async fn echo(ws: WebSocketUpgrade) -> Response {
-    ws.on_upgrade(handle_echo)
+pub async fn echo(
+    ws: WebSocketUpgrade, 
+    State(state): State<AppState>
+) -> Response {
+    let (tx, rx) = state.channel.subscribe();
+    ws.on_upgrade(|ws| handle_echo(ws, tx, rx))
 }
 
-async fn handle_echo(mut sock: WebSocket) {
-    while let Some(msg) = sock.recv().await {
-        let msg = if let Ok(msg) = msg {
-            let msg = extract_message(msg).unwrap(); // TODO refactor this trash
-            let msg = strip_quotes(&msg);
-            format!(
-                "<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>NAEM:</span> {}<br></div>",
-                msg
-            )
-        } else {
-            // client dc
-            return;
-        };
+async fn handle_echo(
+    mut sock: WebSocket,
+    mut tx: broadcast::Sender<String>, 
+    mut rx: broadcast::Receiver<String>
+) {
+    let (mut sock_tx, mut sock_rx) = sock.split();
 
-        if sock.send(Message::Text(msg)).await.is_err() {
-            // client dc
-            return;
+    let send_task = tokio::spawn(async move {
+        let mut sock = sock_tx;
+
+        while let Ok(msg) = rx.recv().await {
+            println!("msg received in broadcast");
+            match sock.send(Message::Text(msg)).await {
+                Ok(_) => (),
+                Err(_) => return,
+            };
         }
-    }
+    });
+
+    let recv_task = tokio::spawn(async move {
+        let mut sock = sock_rx;
+
+        while let Some(Ok(msg)) = sock.next().await {
+            let msg = extract_message(msg).unwrap();
+            let msg = strip_quotes(&msg);
+            let msg = format!("<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>NAEM:</span> {}<br></div>", msg);
+            println!("msg received in socket");
+            if tx.send(msg).is_err() {
+                return;
+            }
+        }
+    });
+
+
+    // while let Some(msg) = sock.recv().await {
+    //     let msg = if let Ok(msg) = msg {
+    //         let msg = extract_message(msg).unwrap(); // TODO refactor this trash
+    //         let msg = strip_quotes(&msg);
+    //         format!(
+    //             "<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>NAEM:</span> {}<br></div>",
+    //             msg
+    //         )
+    //     } else {
+    //         // client dc
+    //         return;
+    //     };
+
+    //     if sock.send(Message::Text(msg)).await.is_err() {
+    //         // client dc
+    //         return;
+    //     }
+    // }
 }
 
 #[derive(Debug, Deserialize)]

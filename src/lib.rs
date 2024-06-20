@@ -6,12 +6,11 @@ use axum::{extract::Extension, response::Redirect, routing::get, Router};
 use minijinja::Environment;
 use rusqlite::Connection;
 use state::AppState;
+use tokio::sync::broadcast;
 use std::{
     sync::{Arc, Mutex},
     fs, path::Path
 };
-
-use crate::state::TopLevelState;
 
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut env = Environment::new();
@@ -25,9 +24,7 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     init_db();
 
-    let state = TopLevelState{
-        state: Arc::new(Mutex::new(AppState::new()))
-    };
+    let state = AppState::with_capacity(16);
 
     let app = Router::new()
         .route("/", get(|| async { Redirect::to("/login") }))

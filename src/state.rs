@@ -1,40 +1,36 @@
-use std::{collections::HashMap, sync::{Arc, Mutex}};
-
-use axum::extract::ws::WebSocket;
+use std::sync::Arc;
+use tokio::sync::broadcast::{self, Receiver, Sender};
 
 #[derive(Clone)]
-pub struct TopLevelState {
-    pub state: Arc<Mutex<AppState>>,
-}
-
 pub struct AppState {
-    rooms: HashMap<String, Room>,
+    pub channel: Arc<Channel>,
 }
 
 impl AppState {
     pub fn new() -> AppState {
-        AppState {
-            rooms: HashMap::<String, Room>::new(),
-        }
+        AppState { channel: Arc::new(Channel::new(16)) }
     }
 
-    pub fn create_room(&mut self, name: String) {
-        let room = Room::new(name.clone());
-
-        self.rooms.insert(name, room);
+    pub fn with_capacity(cap: usize) -> AppState {
+        AppState { channel: Arc::new(Channel::new(cap)) }
     }
 }
 
-pub struct Room {
-    name: String,
-    users: HashMap<String, WebSocket>,
+pub struct Channel {
+    pub tx: Sender<String>,
+    rx: Receiver<String>,
 }
 
-impl Room {
-    pub fn new(name: String) -> Room {
-        Room {
-            name,
-            users: HashMap::<String, WebSocket>::new(),
-        }
+impl Channel {
+    pub fn new(cap: usize) -> Channel {
+        let (tx, rx) = broadcast::channel(cap);
+        Channel { tx, rx }
+    }
+
+    pub fn subscribe(&self) -> (Sender<String>, Receiver<String>) {
+        let rx = self.tx.subscribe();
+        let tx = self.tx.clone();
+
+        (tx, rx)
     }
 }
