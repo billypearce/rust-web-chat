@@ -1,15 +1,20 @@
 mod handlers;
 mod staticfiles;
 mod state;
+mod auth;
+mod chat;
 
 use axum::{extract::Extension, response::Redirect, routing::get, Router};
 use minijinja::Environment;
 use rusqlite::Connection;
-use state::AppState;
-use tokio::sync::broadcast;
 use std::{
-    sync::{Arc, Mutex},
-    fs, path::Path
+    fs, 
+    path::Path
+};
+
+use crate::{
+    handlers::{home, static_file, login_page, auth, register_page, create_user, chat},
+    state::AppState,
 };
 
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,14 +33,14 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = Router::new()
         .route("/", get(|| async { Redirect::to("/login") }))
-        .route("/:id", get(handlers::home))
-        .route("/login", get(handlers::login_page).post(handlers::auth))
+        .route("/:id", get(home))
+        .route("/login", get(login_page).post(auth))
         .route(
             "/register",
-            get(handlers::register_page).post(handlers::create_user),
+            get(register_page).post(create_user),
         )
-        .route("/static/*path", get(handlers::static_file))
-        .route("/echo", get(handlers::echo))
+        .route("/static/*path", get(static_file))
+        .route("/chat", get(chat))
         .layer(Extension(env))
         .with_state(state);
 

@@ -4,7 +4,7 @@
 {% block body %}
 
 <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
-<div id="chat-box-wrapper" hx-ext="ws" ws-connect="/echo">
+<div id="chat-box-wrapper" hx-ext="ws" ws-connect="/chat">
     <p>echo chat:</p>
     <div id="chat-box" hx-ws="receive">
 

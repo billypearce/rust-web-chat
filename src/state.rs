@@ -7,10 +7,6 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new() -> AppState {
-        AppState { channel: Arc::new(Channel::new(16)) }
-    }
-
     pub fn with_capacity(cap: usize) -> AppState {
         AppState { channel: Arc::new(Channel::new(cap)) }
     }
@@ -18,13 +14,13 @@ impl AppState {
 
 pub struct Channel {
     pub tx: Sender<String>,
-    rx: Receiver<String>,
+    _rx: Receiver<String>,
 }
 
 impl Channel {
     pub fn new(cap: usize) -> Channel {
         let (tx, rx) = broadcast::channel(cap);
-        Channel { tx, rx }
+        Channel { tx, _rx: rx }
     }
 
     pub fn subscribe(&self) -> (Sender<String>, Receiver<String>) {
