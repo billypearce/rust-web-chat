@@ -26,7 +26,12 @@ async fn handle_chat(
 ) {
     let (sock_tx, sock_rx) = sock.split();
 
-    let _send_task = tokio::spawn(async move {
+    tx.send(format!(
+        "<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>{} has joined the chat.</span><br></div>", 
+        &name
+    )).unwrap();
+
+    let mut send_task = tokio::spawn(async move {
         let mut sock = sock_tx;
 
         while let Ok(msg) = rx.recv().await {
@@ -37,18 +42,32 @@ async fn handle_chat(
         }
     });
 
-    let _recv_task = tokio::spawn(async move {
+    let display_name = name.clone();
+    let task_tx = tx.clone();
+
+    let mut recv_task = tokio::spawn(async move {
         let mut sock = sock_rx;
 
         while let Some(Ok(msg)) = sock.next().await {
             let msg = extract_message(msg).unwrap();
             let msg = strip_quotes(&msg);
-            let msg = format!("<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>{}:</span> {}<br></div>", name, msg);
-            if tx.send(msg).is_err() {
+            let msg = format!("<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>{}:</span> {}<br></div>", display_name, msg);
+            if task_tx.send(msg).is_err() {
                 return;
             }
         }
     });
+
+    // user dc
+    tokio::select! {
+        _ = &mut send_task => recv_task.abort(),
+        _ = &mut recv_task => send_task.abort(),
+    };
+
+    tx.send(format!(
+        "<div id='chat-box' hx-swap-oob='beforeend'><span class='display-name'>{} has left the chat.</span><br></div>", 
+        &name
+    )).unwrap();
 }
 
 fn extract_message(raw_message: Message) -> Result<String, serde_json::Error> {
