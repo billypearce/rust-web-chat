@@ -4,7 +4,7 @@ mod state;
 mod auth;
 mod chat;
 
-use axum::{extract::Extension, response::Redirect, routing::get, Router};
+use axum::{extract::Extension, routing::get, Router};
 use minijinja::Environment;
 use rusqlite::Connection;
 use std::{
@@ -13,7 +13,7 @@ use std::{
 };
 
 use crate::{
-    handlers::{home, static_file, login_page, auth, register_page, create_user, chat},
+    handlers::{home, static_file, login_page, auth, register_page, create_user, chat_page, chat},
     state::AppState,
 };
 
@@ -32,8 +32,8 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let state = AppState::with_capacity(16);
 
     let app = Router::new()
-        .route("/", get(|| async { Redirect::to("/login") }))
-        .route("/:id", get(home))
+        .route("/", get(home))
+        .route("/home", get(chat_page))
         .route("/login", get(login_page).post(auth))
         .route(
             "/register",

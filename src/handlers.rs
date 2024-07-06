@@ -1,19 +1,28 @@
 use axum::{
-    extract::{Extension, Path},
-    response::Html
+    http::HeaderMap, response::Redirect
 };
-use minijinja::{context, Environment};
 use rusqlite::Connection;
 
 // re-export of handlers from other modules
 pub use crate::{
     staticfiles::static_file,
     auth::{auth, login_page, register_page, create_user},
-    chat::chat,
+    chat::{chat_page, chat},
 };
 
-pub async fn home(Extension(env): Extension<Environment<'_>>, Path(userid): Path<u32>) -> Html<String> {
-    let template = env.get_template("index").expect("Template not found");
+pub async fn home(
+    headers: HeaderMap
+) -> Redirect {
+    let userid = headers.get("cookie");
+
+    if userid.is_none() {
+        return Redirect::to("/login");
+    }
+
+    let userid = userid.unwrap().to_str().unwrap();
+    let split: Vec<&str> = userid.split("=").collect();
+    let userid = split[1];
+    let userid: i32 = userid.parse().unwrap();
 
     let db = Connection::open("users.db").unwrap();
 
@@ -28,9 +37,8 @@ pub async fn home(Extension(env): Extension<Environment<'_>>, Path(userid): Path
         Ok(name)
     });
 
-    let text = match template.render(context!{name => result.unwrap()}) {
-        Ok(text) => text,
-        Err(_) => String::from("Template rendering error."),
-    };
-    Html(text)
+    match result {
+        Ok(_) => Redirect::to("/home"),
+        Err(_) => Redirect::to("/login"),
+    }
 }

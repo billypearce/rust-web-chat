@@ -1,13 +1,56 @@
 use axum::{
     extract::{ws::{Message, WebSocket}, Path, State, WebSocketUpgrade
-    },
-    response::Response,
+    }, http::HeaderMap, response::Response, Extension, response::Html
 };
 use tokio::sync::broadcast::{Sender, Receiver};
 use serde_json::Value;
 use futures::{stream::StreamExt, sink::SinkExt};
+use minijinja::{Environment, context};
+use rusqlite::Connection;
 
 use crate::AppState;
+
+#[axum_macros::debug_handler]
+pub async fn chat_page(
+    Extension(env): Extension<Environment<'static>>, 
+    headers: HeaderMap,
+) -> Html<String> {
+    let userid = headers.get("cookie");
+
+    let userid = userid.unwrap().to_str().unwrap();
+    let split: Vec<&str> = userid.split("=").collect();
+    let userid = split[1];
+    let userid: i32 = userid.parse().unwrap();
+
+    let template = env.get_template("index").expect("Template not found");
+
+    let db = Connection::open("users.db").unwrap();
+
+    let mut stmt = db
+        .prepare("SELECT username FROM users WHERE rowid = ?1")
+        .unwrap();
+    let result = stmt.query_row([userid], |row| {
+        let name: String = match row.get(0) {
+            Ok(name) => name,
+            Err(_) => String::from("invalid_user"),
+        };
+        Ok(name)
+    });
+
+    let text = match result {
+        Ok(name) => {
+            match template.render(context!{name}) {
+                Ok(text) => text,
+                Err(_) => String::from("Template rendering error."),
+            }
+        },
+        Err(e) => {
+            format!("error: {}", e)
+        }
+    };
+
+    Html(text)
+}
 
 pub async fn chat(
     ws: WebSocketUpgrade, 

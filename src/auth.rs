@@ -1,6 +1,5 @@
 use axum::{
-    extract::{Query, Form, Extension},
-    response::{Redirect, Html},
+    extract::{Extension, Form, Query}, http::{header::SET_COOKIE, HeaderMap}, response::{Html, Redirect}
 };
 use rusqlite::Connection;
 use minijinja::{Environment, context};
@@ -17,7 +16,10 @@ pub struct AuthResult {
     pub fail: Option<bool>,
 }
 
-pub async fn login_page(Query(status): Query<AuthResult>, Extension(env): Extension<Environment<'_>>) -> Html<String> {
+pub async fn login_page(
+    Query(status): Query<AuthResult>, 
+    Extension(env): Extension<Environment<'_>>
+) -> Html<String> {
     let template = env.get_template("login").unwrap();
 
     let failed = match status.fail {
@@ -29,7 +31,9 @@ pub async fn login_page(Query(status): Query<AuthResult>, Extension(env): Extens
 }
 
 #[axum_macros::debug_handler]
-pub async fn auth(Form(creds): Form<UserCredentials>) -> Redirect {
+pub async fn auth(
+    Form(creds): Form<UserCredentials>
+) -> (HeaderMap, Redirect) {
     let db = Connection::open("users.db").unwrap();
 
     dbg!(&creds);
@@ -38,14 +42,22 @@ pub async fn auth(Form(creds): Form<UserCredentials>) -> Redirect {
     let mut stmt = db
         .prepare("SELECT rowid FROM users WHERE username = ?1 AND password = ?2")
         .unwrap();
+
     let result = stmt.query_row([username, password], |row| {
         let id: i32 = row.get(0).unwrap();
         Ok(id)
     });
 
     match result {
-        Ok(id) => Redirect::to(format!("/{}", id).as_str()),
-        Err(_) => Redirect::to("/login?fail=true"),
+        Ok(id) => {
+            let mut headers = HeaderMap::new();
+            headers.insert(SET_COOKIE, format!("id={}", id).parse().unwrap());
+
+            (headers, Redirect::to("/"))
+        },
+        Err(_) => {
+            (HeaderMap::new(), Redirect::to("/login?fail=true"))
+        }
     }
 }
 
@@ -54,7 +66,7 @@ pub async fn register_page(Extension(env): Extension<Environment<'_>>) -> Html<S
     Html(template.render(context!()).unwrap())
 }
 
-pub async fn create_user(Form(creds): Form<UserCredentials>) -> Redirect {
+pub async fn create_user(Form(creds): Form<UserCredentials>) -> (HeaderMap, Redirect) {
     let db = Connection::open("users.db").unwrap();
 
     dbg!(&creds);
@@ -64,6 +76,6 @@ pub async fn create_user(Form(creds): Form<UserCredentials>) -> Redirect {
 
     match result {
         Ok(_) => auth(Form(creds)).await,
-        Err(_) => Redirect::to("/register?fail=true"),
+        Err(_) => (HeaderMap::new(), Redirect::to("/register?fail=true")),
     }
 }
