@@ -1,24 +1,28 @@
 {% extends "base" %}
-{% block title %}Home{% endblock %}
-{% block header %}Home{% endblock %}
+{% block title %}Chat{% endblock %}
+{% block user %}{{ name }}{% endblock %}
+{% block header %}Chat{% endblock %}
 {% block body %}
 
 <div id="chat-box-wrapper" hx-ext="ws" ws-connect="/chat/{{ name }}">
-    <h5>Chat Room</h5>
-    <p>Chatting as: <span id="username">{{ name }}</span></p>
-    <div id="chat-box" hx-ws="receive">
-
-    </div>
-    <form id="chat-input" ws-send ws-target="#echo-list">
-        <input id="chat-text" name="msg">
-        <input id="chat-send" type="button" onclick="sendChat()" text="Send">
+    <div id="chat-box" hx-ws="receive"></div>
+    <form id="chat-input" ws-send autocomplete="off">
+        <input id="chat-text" name="msg" placeholder="type here.">
+        <input id="send-btn" type="submit" value="Send">
     </form>
     <script>
-        function sendChat() {
+        let form = document.getElementById("chat-input");
+        form.addEventListener('submit', sub);
+        form.addEventListener('htmx:wsAfterSend', clear)
+
+        function sub(evt) {
+            evt.preventDefault();
+        }
+
+        function clear(evt) {
+            console.log("clear triggered.");
             let form = document.getElementById("chat-input");
-            form.submit();
             form.reset();
-            return false;
         }
     </script>
 </div>

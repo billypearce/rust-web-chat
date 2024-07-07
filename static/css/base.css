@@ -1,10 +1,32 @@
 html {
+    /** CSS DARK THEME PRIMARY COLORS */ 
+    --color-primary-100:  #2233f2; 
+    --color-primary-200:  #5449f5; 
+    --color-primary-300:  #725ef7; 
+    --color-primary-400:  #8b74f9;
+    --color-primary-500:  #a18afb; 
+    --color-primary-600:  #b6a1fc;  
+    /** CSS DARK THEME SURFACE COLORS */  
+    --color-surface-100:  #121212; 
+    --color-surface-200:  #282828; 
+    --color-surface-300:  #3f3f3f; 
+    --color-surface-400:  #575757; 
+    --color-surface-500:  #717171; 
+    --color-surface-600:  #8b8b8b;  
+    /** CSS DARK THEME MIXED SURFACE COLORS */  
+    --color-surface-mixed-100:  #201a39; 
+    --color-surface-mixed-200:  #362f4d; 
+    --color-surface-mixed-300:  #4c4661; 
+    --color-surface-mixed-400:  #645d76; 
+    --color-surface-mixed-500:  #7c768b; 
+    --color-surface-mixed-600:  #9590a1;  
+        
     font-family: "Montserrat", sans-serif;
     color: white;
 }
 
 body {
-    background-color: #121212;
+    background-color: var(--color-surface-100);
     margin: 0;
     top: 0;
     min-height: 100vh;
@@ -12,21 +34,22 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: "Roboto Slab", serif;
-    color: #a688fa;
+    color: var(--color-primary-200);
     font-variation-settings: "wght" 800;
 }
 
 h1 {
     font-size: 2.5em;
+    text-align: center;
 }
 
 .top-nav {
     width: 100%;
-    background-color: #1a1625;
+    background-color: var(--color-surface-200);
 }
 
 .top-nav ul {
-    display: block;
+    display: flex;
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -47,7 +70,11 @@ h1 {
 }
 
 .top-nav a:hover {
-    background-color: #a688fa;
+    background-color: var(--color-primary-200);
+}
+
+.top-nav li:last-child {
+    margin-left: auto;
 }
 
 #body {
@@ -58,14 +85,15 @@ h1 {
 #chat-box-wrapper {
     display: flex;
     flex-flow: column;
-    height: 100%;
+    height: 90%;
+    margin: 2em;
 }
 
 #chat-box {
     flex: 1 1 auto;
-    border: 3px solid black;
+    border: 3px solid var(--color-surface-100);
     border-radius: 15px;
-    background-color: #282828;
+    background-color: var(--color-surface-200);
     padding: 1em;
     overflow: scroll;
 }
@@ -74,20 +102,23 @@ h1 {
     flex: 0 1 auto;
     display: flex;
     flex-flow: row;
+    
 }
 
 #chat-input input:first-child {
     flex: 1 1 auto;
+    margin: 0;
 }
 
 #chat-input input:last-child {
     flex: 0 1 auto;
+    margin: 0;
 }
 
 input {
-    border: 3px solid black;
+    border: 3px solid var(--color-surface-100);
     border-radius: 15px;
-    background-color: #282828;
+    background-color: var(--color-surface-200);
     padding: 1em;
     color:white;
     font-family: "Montserrat", sans-serif;
@@ -97,4 +128,52 @@ input {
 .display-name {
     color: #5e43f3;
     font-weight: 700;
+}
+
+#send-btn {
+    background-color: var(--color-surface-200);
+    font-family: "Roboto Slab", serif;
+    font-size: 1em;
+    color: var(--color-primary-200);
+}
+
+#send-btn:hover {
+    background-color: var(--color-primary-200);
+    color: var(--color-surface-200);
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+#chat-text:focus {
+    outline-width: 0;
+    outline-offset: 0;
+    background-color: var(--color-surface-300);
+}
+
+#user {
+    font-family: "Roboto Slab", serif;
+    font-size: 1.5em;
+    color: var(--color-primary-200);
+    margin: 1em;
+    font-weight: bold;
+}
+
+.login {
+    background-color: var(--color-surface-200);
+    margin: 0 auto;
+    padding: 1em;
+    border-radius: 15px;
+}
+
+.login form {
+    width: 12em;
+}
+
+.login input {
+    width: 100%;
 }
