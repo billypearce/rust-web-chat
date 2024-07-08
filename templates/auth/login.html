@@ -2,15 +2,11 @@
 {% block title %}Login{% endblock %} 
 {% block header %}Login{% endblock %} 
 {% block body %}
-    <div class="login">
-        <form method="post">
-            <label for="username">Username:</label><br>
-            <input id="username" type="text" name="username"><br>
-            <label for="password">Password:</label><br>
-            <input id="password" type="password" name="password"><br>
-            <input type="submit" name="submit"><br>
-        </form>
-    </div>
+    <form class="login" method="post">
+        <input id="username" type="text" name="username" placeholder="Username"><br>
+        <input id="password" type="password" name="password" placeholder="Password"><br>
+        <input class="button" type="submit" name="submit" value="Login"><br>
+    </form>
     {% if fail %}
     <p id="error-msg" style="color:red;">Login Failed.</p>
     {% endif %}

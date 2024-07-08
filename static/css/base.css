@@ -78,7 +78,7 @@ h1 {
 }
 
 #body {
-    margin: 0 3em;
+    margin: 0 0;
     height: 80vh;
 }
 
@@ -150,8 +150,6 @@ button:focus {
 }
 
 #chat-text:focus {
-    outline-width: 0;
-    outline-offset: 0;
     background-color: var(--color-surface-300);
 }
 
@@ -170,10 +168,25 @@ button:focus {
     border-radius: 15px;
 }
 
-.login form {
-    width: 12em;
+form.login {
+    width: 302px;
+    background-color: var(--color-surface-200);
+    margin: 0 auto;
+    padding: 0;
+    border-radius: 15px;
 }
 
 .login input {
-    width: 100%;
+    width: 248px;
+    background-color: var(--color-surface-100);
+    border: 0;
+}
+
+.login input:focus {
+    background-color: var(--color-surface-300);
+}
+
+.button:hover {
+    background-color: var(--color-primary-200);
+    color: var(--color-surface-200);
 }
