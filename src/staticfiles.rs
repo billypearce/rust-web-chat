@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn css_file_type() {
         assert!(matches!(
-            extension("ahhhHHHHHHAHAHHHHH.css"),
+            extension("stylesheet.css"),
             StaticFileType::Css
         ));
         assert!(matches!(

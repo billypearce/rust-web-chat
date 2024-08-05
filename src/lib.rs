@@ -60,6 +60,6 @@ fn init_db() {
             let db = Connection::open("users.db").unwrap();
             db.execute("CREATE TABLE users(username text UNIQUE, password text);", ()).unwrap();
         },
-        Err(e) => panic!("DB oopsie: {}", e),
+        Err(e) => panic!("DB error: {}", e),
     }
 }
