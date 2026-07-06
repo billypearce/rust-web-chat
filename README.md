@@ -1,38 +1,11 @@
-# Rust Web Chat
+A simple live web chat I created to teach myself Rust and WebSockets. I wrote
+this app with the goal of keeping it fairly minimal, it features a login/register
+interface, and a single live chat room.
 
-A simple and fast web chat written in pure Rust.
+You can run this locally with cargo, it will be served at `http://localhost:3000/`.
 
-## Overview
+Below are some libraries/frameworks used:
 
-This app leverages asychronous Rust in the Axum framework and WebSockets to create a fast realtime chat room, featuring account creation and login. With Rust installed, this app is runnable with three commands.
-
-Clone the repository:
-
-`git clone https://github.com/billypearce/rust-web-chat.git`
-
-Move to directory:
-
-`cd rust-web-chat`
-
-Run with Cargo:
-
-`cargo run`
-
-Open your browser and go to `http://localhost:3000/`
-
-## Tech Stack
-
-This app was written with the goal of using as few frameworks as possible for my own education as well as a fast, simple user experience.
-
-### Backend
-
-- Rust
-- Axum
-
-### Frontend
-
-- htmx
-
-### Database
-
-- SQLite
+- Database: SQLite
+- Backend Framework: Axum
+- Templating engine: minijinja
